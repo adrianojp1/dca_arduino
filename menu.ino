@@ -1,112 +1,149 @@
 // =============================================================================================================================//
 // --- Auxiliary Functions Definitions --- //
 
-void menu()
+void menu_games()
 {
-  if (onOp == 0)
-  {
-    print_SelecionarJogo();
-    button_ok.waitForButton();
+	onOp = TRUCO;
+	gamesMenu_open = true;
+	while (gamesMenu_open)
+	{
+		lcd.clear();
+		
+		switch (onOp)
+		{
+		case TRUCO:
+			print_msg("Truco");
+			print_firstOpButtons();
+			
+			break;
+		
+		case POKER:
+			print_msg("Teste");
+			print_allButtons();
+			
+			break;
+		
+		case QUIT:
+			print_msg("Sair");
+			print_lastOpButtons();
+			
+			break;
+		default:
+			
+			break;
+		} //end switch
 
-    onOp++;
-  }
-  else
-  {
-    if (button_left.getSingleDebouncedRelease() && onOp != 1)
-      onOp--;
-    if (button_right.getSingleDebouncedRelease() && onOp != 3 /*n_totalOps*/)
-      onOp++;
+		waitForAnyButton();
+		checkArrowButtons(TRUCO, QUIT);
+		if (button_ok.isPressed())
+		{
+			delay(KEY_DELAY);
+			switch (onOp)
+			{
+			case TRUCO:
+				lcd.clear();
+				print_msg("Truco");
+				op_truco();
+				break;
+			
+			case POKER:
+				lcd.clear();
+				print_msg("Teste");
+				teste_elevador();
+				//op_poker();
+				break;
+			
+			case QUIT:
+				break;
 
-    switch (onOp)
-    {
-    case OP_TRUCO:
-      print_msg("Truco");
-      break;
+			default:
+				break;
+			}
 
-    case OP_POKER:
-      print_msg("Poker");
-      break;
-
-    default:
-      print_msg("Sair");
-      break;
-    } //end switch
-    
-    print_okButton();
-    if(onOp != 1)
-      print_leftButton();
-    if(onOp != 3)
-      print_rightButton();
-    
-    if(button_ok.getSingleDebouncedPress())
-    {
-      if(onOp == 3)
-      {
-        DCA_isIdle = true;
-        onOp = 0;
-        delay(500);
-      }
-      else
-        DCA_isIdle = false;
-    }
-
-    delay(10);
-  }
+			gamesMenu_open = false;
+			onOp = SELECT_GAME;
+		}
+		Serial.println(onOp);
+		delay(10);
+	} //end while
 } // end menu
 
-void distributing()
+void waitForAnyButton()
 {
-  switch(onOp)
-  {
-    case OP_TRUCO:
-      print_msg("Truco");
-      distr_truco();
-      break;
-
-    case OP_POKER:
-      print_msg("Poker");
-      //distr_poker();
-      break;
-
-    default:
-      break;
-  }
-  
-  DCA_isIdle = true;
-  onOp = 0;
+	while (!button_right.isPressed() && !button_left.isPressed() && !button_ok.isPressed())
+	{
+		//Waiting for a press to end the loop
+	}
 }
 
-void distr_truco()
+void checkArrowButtons(int firstOp, int lastOp)
 {
-  //Dispenses 3 cards in 4 positions
-  for( int i = 0; i<3; i++)
-  {
+	Serial.println(onOp);
+	Serial.println(lastOp);
+	if (button_right.isPressed())
+	{
+		if(onOp != lastOp)
+			moveOp_right();
+		delay(KEY_DELAY);
+	}
+	if (button_left.isPressed())
+	{
+		if(onOp != firstOp)
+			moveOp_left();
+		delay(KEY_DELAY);
+	}
+	
+}
+
+void moveOp_left()
+{
+	onOp--;
+}
+
+void moveOp_right()
+{
+	onOp++;
+}
+
+void op_truco()
+{
+    //Dispenses 3 cards in 4 positions
+    for( int i = 0; i<3; i++)
+    {
+        dispenseCards(3);
+        delay(500);
+        rotatePrincipalAxe((float)1/4);
+        delay(500);
+    }
     dispenseCards(3);
     delay(500);
-    rotatePrincipalAxe((float)1/4);
+    
+    //Rotates back and dispense the flip
+    rotatePrincipalAxe((float)-3/8);
     delay(500);
-  }
-  dispenseCards(3);
-  delay(500);
-  
-  //Rotates back and dispense the flip
-  rotatePrincipalAxe((float)-3/8);
-  delay(500);
-  dispenseCards(1);
-  delay(500);
-
-  //Rotates back to initial position
-  rotatePrincipalAxe((float)-3/8);
+    dispenseCards(1);
+    delay(500);
+    
+    //Rotates back to initial position
+    rotatePrincipalAxe((float)-3/8);
 }
 
-void dispenseCards(int nCards)
+void teste_elevador()
 {
-  digitalWrite(PWM_PIN, 255);
-  delay(nCards * DELAY_PER_CARD);
-  digitalWrite(PWM_PIN, 0   );
+	cardElev_up();
+	Serial.println("Up");
+	delay(1000);
+	cardElev_stop();
+	button_ok.waitForButton();
+	cardElev_down();
+	Serial.println("Down");
+	delay(1000);
+	cardElev_stop();
+	button_ok.waitForButton();
+	delay(500);
+	Serial.println("Acabou");
 }
 
-void rotatePrincipalAxe(float n_revs)
+void teste_dispenser()
 {
-  axeStepper.step(STEPS_PER_CYCLE * n_revs);
 }
