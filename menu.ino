@@ -43,13 +43,13 @@ void menu_games()
 			case TRUCO:
 				lcd.clear();
 				print_msg("Truco");
-				op_truco();
+				distr_truco();
 				break;
 			
 			case POKER:
 				lcd.clear();
 				print_msg("Teste");
-				teste_elevador();
+				teste();
 				//op_poker();
 				break;
 			
@@ -105,45 +105,28 @@ void moveOp_right()
 	onOp++;
 }
 
-void op_truco()
+void distr_truco()
 {
     //Dispenses 3 cards in 4 positions
     for( int i = 0; i<3; i++)
-    {
-        dispenseCards(3);
+	{     dispenseCards(3);
         delay(500);
-        rotatePrincipalAxe((float)1/4);
+		rotate_axe(1.0f/4.0f);
         delay(500);
     }
     dispenseCards(3);
     delay(500);
     
     //Rotates back and dispense the flip
-    rotatePrincipalAxe((float)-3/8);
+	rotate_axe(-3.0f/8.0f);
     delay(500);
     dispenseCards(1);
     delay(500);
     
     //Rotates back to initial position
-    rotatePrincipalAxe((float)-3/8);
+	rotate_axe(-3.0f/8.0f);
 }
 
-void teste_elevador()
-{
-	cardElev_up();
-	Serial.println("Up");
-	delay(1000);
-	cardElev_stop();
-	button_ok.waitForButton();
-	cardElev_down();
-	Serial.println("Down");
-	delay(1000);
-	cardElev_stop();
-	button_ok.waitForButton();
-	delay(500);
-	Serial.println("Acabou");
-}
-
-void teste_dispenser()
+void teste()
 {
 }

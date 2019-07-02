@@ -1,53 +1,96 @@
 // =============================================================================================================================//
-// === Step motor - Principal Axe === //
-void rotatePrincipalAxe(float n_revs)
-{
-	axeStepper.step(STEPS_PER_CYCLE * n_revs);
+// === Driver Stepper - Elevator === //
+void elevate_cards(float n_cards){
+	elevator_stepper.step(DISP_DELAY_PER_CARD * n_cards);
+}
+
+// =============================================================================================================================//
+// === Manual Stepper - Principal Axe === //
+void rotate_axe(float n_revs){
+	int steps = int(STEPS_PER_REV * abs(n_revs));
+	int (*rotate)(int);
+
+	rotate = n_revs > 0.0f ? a_rot_cw : a_rot_ccw;
+	int nextStep = rotate(1);
+
+	while(steps - 1 > 0){
+		nextStep = rotate(nextStep);
+		steps--;
+	}
+}
+
+void a_step1(){
+	digitalWrite(A_IN1, 1);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 1);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step2(){
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 1);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 1);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step3(){
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 1);
+	digitalWrite(A_IN3, 1);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step4(){
+	digitalWrite(A_IN1, 1);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 1);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
+}
+
+void make_step(int step){
+	switch (step){
+	case 1: a_step1(); break;
+	case 2: a_step2(); break;
+	case 3: a_step3(); break;
+	case 4: a_step4(); break;
+	}
+}
+
+int a_rot_cw(int step){
+	make_step(step);
+	return step == 1? 4 : step - 1; //return the next step
+}
+
+int a_rot_ccw(int step){
+	make_step(step);
+	return step == 4? 1 : step + 1; //return the next step
 }
 
 // =============================================================================================================================//
 // === DC Motor - Dispenser === //
-void dispenseCards(int nCards)
-{
-	cardDisp_out();
-	delay(nCards * DELAY_PER_CARD);
-	cardDisp_stop();
+void dispenseCards(int nCards){
+	dispense_out();
+	delay(nCards * DISP_DELAY_PER_CARD);
+	dispense_in();
+	delay(100);
+	dispenser_turnOff();
 }
 
-void cardDisp_stop()
-{
+void dispenser_turnOff(){
 	analogWrite(PWM_PIN_CARDS_OUT, 0);
 	analogWrite(PWM_PIN_CARDS_IN, 0);
 }
 
-void cardDisp_out()
-{
+void dispense_in(){
+	analogWrite(PWM_PIN_CARDS_IN, 255 /*int(255.0f * DISP_VEL_PERCENT / 100.0f)*/);
+	analogWrite(PWM_PIN_CARDS_OUT, 0);
+}
+
+void dispense_out(){
+	analogWrite(PWM_PIN_CARDS_IN, 0);
 	analogWrite(PWM_PIN_CARDS_OUT, int(255.0f * DISP_VEL_PERCENT / 100.0f));
-	analogWrite(PWM_PIN_CARDS_IN, 0);
-}
-
-void cardDisp_in()
-{
-	analogWrite(PWM_PIN_CARDS_IN, int(255.0f * DISP_VEL_PERCENT / 100.0f));
-	analogWrite(PWM_PIN_CARDS_OUT, 0);
-}
-
-// =============================================================================================================================//
-// === DC Motor - Elevator === //
-void cardElev_stop()
-{
-	analogWrite(PWM_PIN_CARDS_UP, 0);
-	analogWrite(PWM_PIN_CARDS_DOWN, 0);
-}
-
-void cardElev_down()
-{
-	analogWrite(PWM_PIN_CARDS_DOWN, int(255.0f * ELEV_VEL_PERCENT / 100.0f));
-	analogWrite(PWM_PIN_CARDS_UP, 0);
-}
-
-void cardElev_up()
-{
-	analogWrite(PWM_PIN_CARDS_DOWN, 0);
-	analogWrite(PWM_PIN_CARDS_UP, int(255.0f * ELEV_VEL_PERCENT / 100.0f));
 }
