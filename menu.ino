@@ -3,6 +3,7 @@
 
 void menu_games()
 {
+	int nPlayersPoker;
 	onOp = TRUCO;
 	gamesMenu_open = true;
 	while (gamesMenu_open)
@@ -18,8 +19,8 @@ void menu_games()
 			break;
 		
 		case POKER:
-			print_msg("Teste");
-			print_allButtons();
+			print_msg("Poker");
+			print_allSelecButtons();
 			
 			break;
 		
@@ -47,10 +48,10 @@ void menu_games()
 				break;
 			
 			case POKER:
+				nPlayersPoker = menuPoker();
 				lcd.clear();
-				print_msg("Teste");
-				teste();
-				//op_poker();
+				print_msg("Poker");
+				op_poker(nPlayersPoker);
 				break;
 			
 			case QUIT:
@@ -63,7 +64,6 @@ void menu_games()
 			gamesMenu_open = false;
 			onOp = SELECT_GAME;
 		}
-		Serial.println(onOp);
 		delay(10);
 	} //end while
 } // end menu
@@ -78,8 +78,6 @@ void waitForAnyButton()
 
 void checkArrowButtons(int firstOp, int lastOp)
 {
-	Serial.println(onOp);
-	Serial.println(lastOp);
 	if (button_right.isPressed())
 	{
 		if(onOp != lastOp)
@@ -92,7 +90,6 @@ void checkArrowButtons(int firstOp, int lastOp)
 			moveOp_left();
 		delay(KEY_DELAY);
 	}
-	
 }
 
 void moveOp_left()
@@ -109,7 +106,8 @@ void distr_truco()
 {
     //Dispenses 3 cards in 4 positions
     for( int i = 0; i<3; i++)
-	{     dispenseCards(3);
+	{     
+		dispenseCards(3);
         delay(500);
 		rotate_axe(1.0f/4.0f);
         delay(500);
@@ -125,6 +123,54 @@ void distr_truco()
     
     //Rotates back to initial position
 	rotate_axe(-3.0f/8.0f);
+}
+
+void op_poker(int n_Players)
+{
+	//Dispenses 2 cards in nPlayers positions
+	for (int i = 0; i < (n_Players - 1); i++)
+	{
+		dispenseCards(2);
+		delay(500);
+		rotate_axe(1.0f / n_Players);
+		delay(500);
+	}
+	dispenseCards(2);
+	delay(500);
+
+	//Rotates back and dispense the five desk cards
+	rotate_axe(-((float)((n_Players - 1) / (float)(2 * n_Players))));
+	delay(500);
+	dispenseCards(5);
+	delay(500);
+
+	//Rotates back to initial position
+	rotate_axe(-((float)((n_Players - 1) / (float)(2 * n_Players))));
+}
+
+int menuPoker()
+{
+	int nPlayers = MIN_POKER;
+
+	while (!button_ok.isPressed())
+	{
+		print_pokerButtons(nPlayers);
+		waitForAnyButton();
+		if (button_left.isPressed() && nPlayers != MIN_POKER)
+		{
+			nPlayers--;
+			delay(KEY_DELAY);
+		}
+
+		if (button_right.isPressed() && nPlayers != MAX_POKER)
+		{
+			nPlayers++;
+			delay(KEY_DELAY);
+		}
+	}
+	delay(KEY_DELAY);
+
+	return nPlayers;
 }
 
 void teste()

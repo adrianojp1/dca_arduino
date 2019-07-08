@@ -11,44 +11,11 @@ void rotate_axe(float n_revs){
 	int (*rotate)(int);
 
 	rotate = n_revs > 0.0f ? a_rot_cw : a_rot_ccw;
-	int nextStep = rotate(1);
 
-	while(steps - 1 > 0){
+	while(steps > 0){
 		nextStep = rotate(nextStep);
 		steps--;
 	}
-}
-
-void a_step1(){
-	digitalWrite(A_IN1, 1);
-	digitalWrite(A_IN2, 0);
-	digitalWrite(A_IN3, 0);
-	digitalWrite(A_IN4, 1);
-	delay(AXE_STEP_DELAY);
-}
-
-void a_step2(){
-	digitalWrite(A_IN1, 0);
-	digitalWrite(A_IN2, 1);
-	digitalWrite(A_IN3, 0);
-	digitalWrite(A_IN4, 1);
-	delay(AXE_STEP_DELAY);
-}
-
-void a_step3(){
-	digitalWrite(A_IN1, 0);
-	digitalWrite(A_IN2, 1);
-	digitalWrite(A_IN3, 1);
-	digitalWrite(A_IN4, 0);
-	delay(AXE_STEP_DELAY);
-}
-
-void a_step4(){
-	digitalWrite(A_IN1, 1);
-	digitalWrite(A_IN2, 0);
-	digitalWrite(A_IN3, 1);
-	digitalWrite(A_IN4, 0);
-	delay(AXE_STEP_DELAY);
 }
 
 void make_step(int step){
@@ -57,17 +24,87 @@ void make_step(int step){
 	case 2: a_step2(); break;
 	case 3: a_step3(); break;
 	case 4: a_step4(); break;
+	case 5: a_step5(); break;
+	case 6: a_step6(); break;
+	case 7: a_step7(); break;
+	case 8: a_step8(); break;
 	}
+}
+
+
+void a_step1(){
+	digitalWrite(A_IN1, 1);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 1);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step2(){
+	digitalWrite(A_IN1, 1);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step3(){
+	digitalWrite(A_IN1, 1);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 1);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step4(){
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 1);
+	delay(AXE_STEP_DELAY);
+}
+
+
+void a_step5() {
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 1);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 1);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step6() {
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 1);
+	digitalWrite(A_IN3, 0);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step7() {
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 1);
+	digitalWrite(A_IN3, 1);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
+}
+
+void a_step8() {
+	digitalWrite(A_IN1, 0);
+	digitalWrite(A_IN2, 0);
+	digitalWrite(A_IN3, 1);
+	digitalWrite(A_IN4, 0);
+	delay(AXE_STEP_DELAY);
 }
 
 int a_rot_cw(int step){
 	make_step(step);
-	return step == 1? 4 : step - 1; //return the next step
+	return step == 1? 8 : step - 1; //return the next step
 }
 
 int a_rot_ccw(int step){
 	make_step(step);
-	return step == 4? 1 : step + 1; //return the next step
+	return step == 8? 1 : step + 1; //return the next step
 }
 
 // =============================================================================================================================//

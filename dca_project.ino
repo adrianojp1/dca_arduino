@@ -15,12 +15,12 @@
 // --- Hardware Mapping --- //
 
 //LiquidCrystal lcd(RS, E, DB4, DB5, DB6, DB7);
-#define DB4 5 //LCD Data Bus Line 4
-#define DB5 4 //LCD Data Bus Line 5
-#define DB6 8 //LCD Data Bus Line 6
-#define DB7 9 //LCD Data Bus Line 7
-#define RS 7  //LCD Register Selector (on/off)
-#define E 6   //LCD Enable writing signal on the LC
+#define DB4 1 //LCD Data Bus Line 4
+#define DB5 0 //LCD Data Bus Line 5
+#define DB6 4 //LCD Data Bus Line 6
+#define DB7 5 //LCD Data Bus Line 7
+#define RS 3  //LCD Register Selector (on/off)
+#define E 2   //LCD Enable writing signal on the LC
 
 //Pushbuttons 14, 15, 16
 #define PB1_PIN 14 //Pushbutton Left pin
@@ -46,8 +46,8 @@ Brown - 14
 Green/Black - GND
 */
 
-#define PWM_PIN_CARDS_OUT 11 //PWM pin cards up (Elevator)
-#define PWM_PIN_CARDS_IN 10 //PWM pin cards down (Elevator)
+#define PWM_PIN_CARDS_OUT 11 //PWM pin cards out (Dispenser)
+#define PWM_PIN_CARDS_IN 10 //PWM pin cards in (Dispenser)
 
 //analogWrite(PWM_PIN, pwm_value) value from 0(0% of duty cycle) to 255 (100% of duty cycle)
 
@@ -59,25 +59,28 @@ Green/Black - GND
 #define ELEVATOR_MAX_SPEED 15 //in rpm
 
 //Dispenser
-#define DISP_VEL_PERCENT 20 //PWM duty cycle / Min 5~10
+#define DISP_VEL_PERCENT 100 //%  PWM duty cycle / Min 5~10
 #define DISP_DELAY_PER_CARD 400 //Dispenser delay per card
 
 //Axe Manual Stepper
-#define AXE_STEP_DELAY 50
-#define STEPS_PER_REV 48
+#define AXE_STEP_DELAY 40
+#define STEPS_PER_REV 96
 
 //Options
 #define SELECT_GAME 0
 #define GENERIC_GAME 1
 #define TRUCO 2
-#define POKER 3 //test
+#define POKER 3
 #define QUIT 4
+#define MIN_POKER 2
+#define MAX_POKER 8
 
 #define KEY_DELAY 300
 
 // =============================================================================================================================//
 // --- Variables Declaration --- //
 int onOp; // Menu option displayed
+int nextStep;
 bool gamesMenu_open;
 bool genericGame_open;
 
@@ -104,8 +107,7 @@ void moveOp_right();
 //Games Options
 void distr_truco();
 void teste();
-void teste_dispenser();
-//void op_poker();
+void op_poker(int n_Players);
 
 //Elevator
 void elevate_cards(float n_cards); // n_cards < 0: goes down
@@ -140,7 +142,9 @@ void dispense_out();
 void print_leftButton();
 void print_rightButton();
 void print_okButton();
-void print_allButtons();
+void print_allSelecButtons();
+void print_pokerButtons(int n_Players);
+void print_pokerPlayers(int n_players);
 void print_firstOpButtons();
 void print_lastOpButtons();
 void print_msg(String msg);
@@ -152,6 +156,7 @@ void setup()
     onOp = SELECT_GAME;
 	gamesMenu_open = false;
 	genericGame_open = false;
+	nextStep = 1;
 
 	//LCD
     lcd.begin(16, 2); //Define number of rows and columns
