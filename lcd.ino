@@ -35,20 +35,41 @@ void print_allSelecButtons()
 	print_okButton();
 }
 
-void print_pokerButtons(int n_Players)
-{
-	lcd.clear();
-	print_msg("Jogadores: ");
+void print_countingButtons() {
 	print_minusButton();
 	print_plusButton();
 	print_okButton();
+}
+
+void print_nPlayers(int n_Players)
+{
+	lcd.clear();
+	print_msg("Jogadores: ");
+	print_countingButtons();
 	print_pokerPlayers(n_Players);
 }
+
+void print_nCards(int nCards)
+{
+	lcd.clear();
+	print_msg("Cartas: ");
+	print_countingButtons();
+	lcd.setCursor(9, 0);
+	lcd.print(nCards);
+}
+
 
 void print_pokerPlayers(int n_players)
 {
 	lcd.setCursor(12, 0);
 	lcd.print(n_players);
+}
+
+void print_elevator()
+{
+	lcd.clear();
+	lcd.print("Ajustando");
+	print_countingButtons();
 }
 
 void print_firstOpButtons()

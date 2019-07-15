@@ -15,12 +15,12 @@
 // --- Hardware Mapping --- //
 
 //LiquidCrystal lcd(RS, E, DB4, DB5, DB6, DB7);
-#define DB4 1 //LCD Data Bus Line 4
-#define DB5 0 //LCD Data Bus Line 5
-#define DB6 4 //LCD Data Bus Line 6
-#define DB7 5 //LCD Data Bus Line 7
-#define RS 3  //LCD Register Selector (on/off)
-#define E 2   //LCD Enable writing signal on the LC
+#define DB4 5 //LCD Data Bus Line 4
+#define DB5 4 //LCD Data Bus Line 5
+#define DB6 8 //LCD Data Bus Line 6
+#define DB7 9 //LCD Data Bus Line 7
+#define RS 7  //LCD Register Selector (on/off)
+#define E 6   //LCD Enable writing signal on the LC
 
 //Pushbuttons 14, 15, 16
 #define PB1_PIN 14 //Pushbutton Left pin
@@ -55,32 +55,34 @@ Green/Black - GND
 // --- Macros --- //
 //Elevator Driver Stepper
 #define STEPS_PER_CYCLE 2048
-#define STEPS_PER_CARD 500
-#define ELEVATOR_MAX_SPEED 15 //in rpm
+#define STEPS_PER_CARD 152
+#define ELEVATOR_MAX_SPEED 17 //in rpm
 
 //Dispenser
 #define DISP_VEL_PERCENT 100 //%  PWM duty cycle / Min 5~10
-#define DISP_DELAY_PER_CARD 400 //Dispenser delay per card
+#define DISP_DELAY_PER_CARD 150 //Dispenser delay per card
+#define DISP_DELAY_STOP 200
 
 //Axe Manual Stepper
-#define AXE_STEP_DELAY 40
+#define AXE_STEP_DELAY 60
 #define STEPS_PER_REV 96
 
 //Options
 #define SELECT_GAME 0
-#define GENERIC_GAME 1
+#define MV_ELEVATOR 1
 #define TRUCO 2
 #define POKER 3
-#define QUIT 4
+#define GENERIC_GAME 4
+#define QUIT 5
 #define MIN_POKER 2
 #define MAX_POKER 8
 
-#define KEY_DELAY 300
+#define KEY_DELAY 250
 
 // =============================================================================================================================//
 // --- Variables Declaration --- //
 int onOp; // Menu option displayed
-int nextStep;
+int curr_step;
 bool gamesMenu_open;
 bool genericGame_open;
 
@@ -99,18 +101,21 @@ Pushbutton button_ok(PB3_PIN);     //Pushbutton Ok Selection
 
 //Routines
 void menu_games();
+int menuGenericPlayers();
+int menuGenericCards(int players);
+void generic_game(int cards, int n_Players);
 void waitForAnyButton();
 void checkArrowButtons(int firstOp, int lastOp);
 void moveOp_left();
 void moveOp_right();
+void move_elevator();
 
 //Games Options
 void distr_truco();
-void teste();
 void op_poker(int n_Players);
 
 //Elevator
-void elevate_cards(float n_cards); // n_cards < 0: goes down
+void elevate_cards(int steps); // n_cards < 0: goes down
 
 //Principal Axe
 /* The only function to be called for routines
@@ -124,6 +129,10 @@ void a_step1();
 void a_step2();
 void a_step3();
 void a_step4();
+void a_step5();
+void a_step6();
+void a_step7();
+void a_step8();
 void make_step(int step);
 /* Rotate axe clockwise
 return: next step*/
@@ -135,7 +144,7 @@ int a_rot_ccw(int step);
 //Dispenser
 void dispenseCards(int nCards);
 void dispenser_turnOff();
-void dispense_out();
+void dispense_in();
 void dispense_out();
 
 //LCD
@@ -143,8 +152,10 @@ void print_leftButton();
 void print_rightButton();
 void print_okButton();
 void print_allSelecButtons();
-void print_pokerButtons(int n_Players);
+void print_countingButtons();
+void print_nPlayers(int n_Players);
 void print_pokerPlayers(int n_players);
+void print_elevator();
 void print_firstOpButtons();
 void print_lastOpButtons();
 void print_msg(String msg);
@@ -156,7 +167,7 @@ void setup()
     onOp = SELECT_GAME;
 	gamesMenu_open = false;
 	genericGame_open = false;
-	nextStep = 1;
+	curr_step = 1;
 
 	//LCD
     lcd.begin(16, 2); //Define number of rows and columns
@@ -182,23 +193,17 @@ void loop()
 	case SELECT_GAME:
 		print_msg("Selecionar Jogo");
 		print_firstOpButtons();
-
 		break;
 
-	case GENERIC_GAME:
-		print_msg("Jogo Generico");
+	case MV_ELEVATOR:
+		print_msg("Mover Elevador");
 		print_lastOpButtons();
-
-		break;
-
-	default:
 		break;
 	}
-	
+
 	waitForAnyButton();
-	checkArrowButtons(SELECT_GAME, GENERIC_GAME);
-	if (button_ok.isPressed())
-	{
+	checkArrowButtons(SELECT_GAME, MV_ELEVATOR);
+	if (button_ok.isPressed()){
 		delay(KEY_DELAY);
 		switch (onOp)
 		{
@@ -206,14 +211,12 @@ void loop()
 			menu_games();
 			break;
 
-		case GENERIC_GAME:
-			//função de escolher número de cartas e jogadores
-			break;
-
-		default:
+		case MV_ELEVATOR:
+			move_elevator();
 			break;
 		}
 	}
+	delay(KEY_DELAY);
 
 	delay(10);
   

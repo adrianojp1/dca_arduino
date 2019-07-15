@@ -1,19 +1,20 @@
 // =============================================================================================================================//
 // === Driver Stepper - Elevator === //
-void elevate_cards(float n_cards){
-	elevator_stepper.step(DISP_DELAY_PER_CARD * n_cards);
+void elevate_cards(int steps){
+	elevator_stepper.step(-steps);
 }
 
 // =============================================================================================================================//
 // === Manual Stepper - Principal Axe === //
 void rotate_axe(float n_revs){
 	int steps = int(STEPS_PER_REV * abs(n_revs));
-	int (*rotate)(int);
+	int (*get_nextStep)(int);
 
-	rotate = n_revs > 0.0f ? a_rot_cw : a_rot_ccw;
+	get_nextStep = n_revs > 0.0f ? a_rot_cw : a_rot_ccw;
 
 	while(steps > 0){
-		nextStep = rotate(nextStep);
+		make_step(curr_step);
+		curr_step = get_nextStep(curr_step);
 		steps--;
 	}
 }
@@ -98,23 +99,27 @@ void a_step8() {
 }
 
 int a_rot_cw(int step){
-	make_step(step);
 	return step == 1? 8 : step - 1; //return the next step
 }
 
 int a_rot_ccw(int step){
-	make_step(step);
 	return step == 8? 1 : step + 1; //return the next step
 }
 
 // =============================================================================================================================//
 // === DC Motor - Dispenser === //
 void dispenseCards(int nCards){
-	dispense_out();
-	delay(nCards * DISP_DELAY_PER_CARD);
-	dispense_in();
-	delay(100);
-	dispenser_turnOff();
+	for (int i = 0; i < nCards; i++)
+	{
+		dispense_out();
+		delay(DISP_DELAY_PER_CARD);
+		dispense_in();
+		delay(DISP_DELAY_STOP);
+		dispenser_turnOff();
+		int elev_steps = STEPS_PER_CARD;
+		elevate_cards(elev_steps);
+		delay(100);
+	}
 }
 
 void dispenser_turnOff(){
